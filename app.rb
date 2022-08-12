@@ -4,6 +4,14 @@ class Game_of_life
         @num_of_generations = num_of_generations
         @newGrid = Grid.new(row,col)
         @printer = Printer.new(@newGrid)
+        @printer.print_grid
+    end
+    def next_generation 
+        @num_of_generations.times do
+            @newGrid.count_neighbors
+            @newGrid.update_grid
+            @printer.print_grid
+        end
     end
 
 
@@ -16,7 +24,7 @@ class Grid
         @col = col
         @grid = Array.new(row) { Array.new(col) { Cell.new } }
         get_neighbors
-        count_neighbors      
+              
     end
 
     def get_neighbors
@@ -44,14 +52,43 @@ class Grid
     def count_neighbors
         @row.times do |row|
              @grid[row].each do |cell|
+                alive_count=0
+                dead_count=0
                 cell.neighbors.each do |neighbor|
-                    
+                    neighbor.is_alive ? alive_count+=1 : dead_count+=1             
+                   
                 end
+                cell.alive_neighbors=alive_count
+                cell.dead_neighbors=dead_count
+
+
             end 
         end
     end
+    def will_die(cell)
+        cell.is_alive&&(cell.alive_neighbors<2||cell.alive_neighbors>3)
+    end
 
+    def will_live(cell)
+        cell.is_alive&&(cell.alive_neighbors==2||cell.alive_neighbors==3)||(!cell.is_alive&&cell.alive_neighbors==3)
+    end
+    def update_grid
+        @row.times do |i|
+    
+            @col.times do |j|
+            
+                will_die(@grid[i][j]) ? @grid[i][j].kill_cell :
+                will_live(@grid[i][j]) ? @grid[i][j].revive_cell :
+
+            end
+        end
+    end
+ 
 end
+
+
+
+
 
 class Printer
     def initialize(grid_object)
@@ -79,16 +116,27 @@ end
 
 class Cell 
     #reader
-    attr_accessor :neighbors
+    attr_accessor :neighbors, :alive_neighbors, :dead_neighbors  
     attr_reader :status
     def initialize
+        alive_neighbors=0
+        dead_neighbors=0
         @type_of_cell = [".","*"]
         @status = @type_of_cell[rand(2)]
         @neighbors = []
     end 
 
     def is_alive
-        return @status=='*'
+        @status=='*'
+    end
+    def is_dead
+        @status=='.'
+    end
+    def kill_cell
+        @status='.'
+    end
+    def revive_cell
+        @status='*'
     end
 end
 
@@ -99,10 +147,7 @@ print "Inserte número de columnas "
 col = gets.chomp.to_i 
 
 game = Game_of_life.new(row,col)
-game.printer.print_grid
-game.printer.print_neighbors(0,0)
-
-
+game.next_generation
 
 
 
