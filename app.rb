@@ -1,13 +1,15 @@
 class Game_of_life
     attr_reader :printer
     def initialize(num_of_generations = 2,row,col)
+        puts "Generation 1:"
         @num_of_generations = num_of_generations
         @newGrid = Grid.new(row,col)
         @printer = Printer.new(@newGrid)
         @printer.print_grid
     end
     def next_generation 
-        @num_of_generations.times do
+        @num_of_generations.times do |i|
+            puts "Generation #{i+2}:"
             @newGrid.count_neighbors
             @newGrid.update_grid
             @printer.print_grid
@@ -70,15 +72,15 @@ class Grid
     end
 
     def will_live(cell)
-        cell.is_alive&&(cell.alive_neighbors==2||cell.alive_neighbors==3)||(!cell.is_alive&&cell.alive_neighbors==3)
+        (cell.is_alive&&(cell.alive_neighbors==2||cell.alive_neighbors==3))||(!cell.is_alive&&cell.alive_neighbors==3)
     end
     def update_grid
         @row.times do |i|
     
             @col.times do |j|
             
-                will_die(@grid[i][j]) ? @grid[i][j].kill_cell :
-                will_live(@grid[i][j]) ? @grid[i][j].revive_cell :
+                will_die(@grid[i][j])? @grid[i][j].kill_cell : will_live(@grid[i][j])? @grid[i][j].revive_cell : ""
+                
 
             end
         end
@@ -145,8 +147,10 @@ print "Inserte número de filas "
 row = gets.chomp.to_i 
 print "Inserte número de columnas "
 col = gets.chomp.to_i 
+print "Inserte número de generaciones "
+num_of_generations = gets.chomp.to_i 
 
-game = Game_of_life.new(row,col)
+game = Game_of_life.new(num_of_generations,row,col)
 game.next_generation
 
 
